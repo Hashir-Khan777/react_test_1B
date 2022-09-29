@@ -15,7 +15,9 @@ export default function MkdSDK() {
 
   this.login = async function (email, password, role) {
     //TODO
-    console.log("Login", email, password, role);
+    this.setTable("login");
+    const data = await this.callRestAPI({ email, password, role }, "POST");
+    return data;
   };
 
   this.getHeader = function () {
@@ -56,6 +58,26 @@ export default function MkdSDK() {
           throw new Error(jsonGet.message);
         }
         return jsonGet;
+
+      case "POST":
+        const postResult = await fetch(
+          this._baseurl + `/v2/api/lambda/${this._table}`,
+          {
+            method: "post",
+            headers: header,
+            body: JSON.stringify(payload),
+          }
+        );
+        const jsonPost = await postResult.json();
+
+        if (postResult.status === 401) {
+          throw new Error(jsonGet.message);
+        }
+
+        if (postResult.status === 403) {
+          throw new Error(jsonGet.message);
+        }
+        return jsonPost;
 
       case "PAGINATE":
         if (!payload.page) {
