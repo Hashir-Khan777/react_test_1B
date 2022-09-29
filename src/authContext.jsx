@@ -52,6 +52,17 @@ const AuthProvider = ({ children }) => {
 
   React.useEffect(() => {
     //TODO
+    const role = localStorage.getItem("role");
+    const token = localStorage.getItem("token");
+    if (role && token) {
+      dispatch({
+        type: "LOGIN",
+        payload: {
+          role,
+          token,
+        },
+      });
+    }
   }, []);
 
   return (
