@@ -38,12 +38,11 @@ const reducer = (state, action) => {
 let sdk = new MkdSDK();
 
 export const tokenExpireError = (dispatch, errorMessage) => {
-  const role = localStorage.getItem("role");
   if (errorMessage === "TOKEN_EXPIRED") {
     dispatch({
       type: "LOGOUT",
     });
-    window.location.href = "/" + role + "/login";
+    window.location.href = "/admin/login";
   }
 };
 
@@ -54,9 +53,16 @@ const AuthProvider = ({ children }) => {
     //TODO
     const role = localStorage.getItem("role");
     const token = localStorage.getItem("token");
-    sdk.check(role).then((data) => {
-      tokenExpireError(dispatch, data.message);
-    });
+    sdk
+      .check(role)
+      .then((data) => {
+        tokenExpireError(dispatch, data.message);
+      })
+      .catch(() => {
+        if (window.location.pathname !== "/admin/login") {
+          tokenExpireError(dispatch, "TOKEN_EXPIRED");
+        }
+      });
     if (role && token) {
       dispatch({
         type: "LOGIN",
