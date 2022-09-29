@@ -41,7 +41,7 @@ export const tokenExpireError = (dispatch, errorMessage) => {
   const role = localStorage.getItem("role");
   if (errorMessage === "TOKEN_EXPIRED") {
     dispatch({
-      type: "Logout",
+      type: "LOGOUT",
     });
     window.location.href = "/" + role + "/login";
   }
@@ -54,6 +54,9 @@ const AuthProvider = ({ children }) => {
     //TODO
     const role = localStorage.getItem("role");
     const token = localStorage.getItem("token");
+    sdk.check(role).then((data) => {
+      tokenExpireError(dispatch, data.message);
+    });
     if (role && token) {
       dispatch({
         type: "LOGIN",

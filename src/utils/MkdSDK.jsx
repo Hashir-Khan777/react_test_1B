@@ -112,7 +112,7 @@ export default function MkdSDK() {
   this.check = async function (role) {
     //TODO
     this.setTable("check");
-    const data = await this.callRestAPI({ email, password, role }, "POST");
+    const data = await this.callRestAPI({ role }, "POST");
     return data;
   };
 
