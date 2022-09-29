@@ -34,7 +34,6 @@ const Draggable = ({ video, index, moveVideos }) => {
       if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
         return;
       }
-      console.log(dragIndex, hoverIndex);
       moveVideos(dragIndex, hoverIndex);
       item.index = hoverIndex;
     },
@@ -85,9 +84,7 @@ const AdminDashboardPage = () => {
   };
 
   const moveVideos = (dragIndex, hoverIndex) => {
-    const videosClone = [...videos];
-    videos.splice(dragIndex, 1);
-    videos.splice(hoverIndex, 0, videosClone[dragIndex]);
+    videos.splice(hoverIndex, 0, videos.splice(dragIndex, 1)[0]);
     setVideos([...videos]);
   };
 
