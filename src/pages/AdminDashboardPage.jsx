@@ -125,7 +125,7 @@ const AdminDashboardPage = () => {
                         className="flex text-left items-center"
                       >
                         <img
-                          src="https://pixabay.com/get/g1ce3c25c364ea4eeff1f5634fbe0fc5540fb7c1c98b086db9f042e29df6c9204e3d3e3b19a9597fb47180cfe5d8a04b2_1280.jpg"
+                          src={video.photo}
                           className="w-20 h-full rounded-lg mr-1"
                           alt=""
                         />
@@ -136,7 +136,7 @@ const AdminDashboardPage = () => {
                         className="flex items-center text-zinc-700 text-left"
                       >
                         <img
-                          src="https://pixabay.com/get/g1ce3c25c364ea4eeff1f5634fbe0fc5540fb7c1c98b086db9f042e29df6c9204e3d3e3b19a9597fb47180cfe5d8a04b2_1280.jpg"
+                          src={video.photo}
                           className="w-8 h-8 rounded-full mr-1"
                           alt=""
                         />
