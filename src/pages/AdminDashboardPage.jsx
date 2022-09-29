@@ -1,7 +1,72 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { AuthContext } from "../authContext";
 import MkdSDK from "../utils/MkdSDK";
+import { useDrag, useDrop } from "react-dnd";
+
+const Draggable = ({ video, index, moveVideos }) => {
+  const ref = useRef(null);
+
+  const [, drag] = useDrag(() => ({
+    type: "row",
+    item: { ...video, index },
+  }));
+
+  const [, drop] = useDrop(() => ({
+    accept: "row",
+    hover: (item, monitor) => {
+      if (!ref.current) {
+        return;
+      }
+      const dragIndex = item.index;
+      const hoverIndex = index;
+      if (dragIndex === hoverIndex) {
+        return;
+      }
+      const hoverBoundingRect = ref.current?.getBoundingClientRect();
+      const hoverMiddleY =
+        (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
+      const clientOffset = monitor.getClientOffset();
+      const hoverClientY = clientOffset.y - hoverBoundingRect.top;
+      if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
+        return;
+      }
+      if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
+        return;
+      }
+      console.log(dragIndex, hoverIndex);
+      moveVideos(dragIndex, hoverIndex);
+      item.index = hoverIndex;
+    },
+  }));
+
+  drag(drop(ref));
+
+  return (
+    <div
+      ref={ref}
+      className="flex items-center border border-zinc-700 my-2 rounded-lg py-10 px-6"
+    >
+      <div style={{ flex: 0.1 }} className="text-left">
+        <p className="w-20 text-zinc-700">{video.id}</p>
+      </div>
+      <div style={{ flex: 1.05 }} className="flex text-left items-center">
+        <img src={video.photo} className="w-20 h-full rounded-lg mr-1" alt="" />
+        <p className="text-zinc-700">{video.title}</p>
+      </div>
+      <div
+        style={{ flex: 0.25 }}
+        className="flex items-center text-zinc-700 text-left"
+      >
+        <img src={video.photo} className="w-8 h-8 rounded-full mr-1" alt="" />
+        <p className="w-20 text-zinc-600">{video.username}</p>
+      </div>
+      <div style={{ flex: 0.25 }} className="text-left">
+        <p className="w-20 text-zinc-700">{video.like}</p>
+      </div>
+    </div>
+  );
+};
 
 const AdminDashboardPage = () => {
   const [videos, setVideos] = useState(null);
@@ -19,12 +84,19 @@ const AdminDashboardPage = () => {
     navigate("/admin/login", { replace: true });
   };
 
+  const moveVideos = (dragIndex, hoverIndex) => {
+    const videosClone = [...videos];
+    videos.splice(dragIndex, 1);
+    videos.splice(hoverIndex, 0, videosClone[dragIndex]);
+    setVideos([...videos]);
+  };
+
   useEffect(() => {
     sdk.setTable("video");
     sdk._method = "PAGINATE";
     sdk.callRestAPI({ page, limit: 10 }, "PAGINATE").then((data) => {
       setPage(data.page);
-      setVideos(data);
+      setVideos(data.list);
       setTotalPages(data.num_pages);
     });
   }, [page]);
@@ -76,8 +148,8 @@ const AdminDashboardPage = () => {
             </div>
           </div>
           <div className="mt-24">
-            <div className="flex justify-between items-center">
-              <div>
+            <div className="desktop:flex justify-between items-center">
+              <div className="sm:mb-3 desktop:mb-0">
                 <p className="text-3xl font-thin">Today’s leaderboard</p>
               </div>
               <div className="flex justify-between items-center bg-zinc-800 px-6 py-4 rounded-xl">
@@ -91,64 +163,37 @@ const AdminDashboardPage = () => {
               </div>
             </div>
             {/* Table */}
-            <div className="table-auto mt-9 w-full">
+            <div className="w-full table-auto mt-9 overflow-x-auto">
               <div>
                 <div className="flex items-center px-6">
                   <div style={{ flex: 0.1 }} className="text-left">
                     <p className="w-20 text-zinc-700">#</p>
                   </div>
                   <div style={{ flex: 1 }} className="text-zinc-700 text-left">
-                    Title
+                    <p>Title</p>
                   </div>
                   <div style={{ flex: 0.25 }} className="text-left">
                     <p className="w-20 text-zinc-700">Author</p>
                   </div>
-                  <div style={{ flex: 0.25 }} className="text-left">
+                  <div style={{ flex: 0.25 }} className="w-20 text-left">
                     <p className="w-20 text-zinc-700">Most Liked</p>
                   </div>
                 </div>
               </div>
               <div className="w-full">
                 {videos &&
-                  videos.list.map((video) => (
-                    <div
-                      className="flex items-center border border-zinc-700 my-2 rounded-lg py-10 px-6"
+                  videos.map((video, index) => (
+                    <Draggable
+                      moveVideos={moveVideos}
                       key={video.id}
-                    >
-                      <div style={{ flex: 0.1 }} className="text-left">
-                        <p className="w-20 text-zinc-700">
-                          {video.id < 10 ? `0${video.id}` : video.id}
-                        </p>
-                      </div>
-                      <div
-                        style={{ flex: 1.05 }}
-                        className="flex text-left items-center"
-                      >
-                        <img
-                          src={video.photo}
-                          className="w-20 h-full rounded-lg mr-1"
-                          alt=""
-                        />
-                        <p className="text-zinc-700">{video.title}</p>
-                      </div>
-                      <div
-                        style={{ flex: 0.25 }}
-                        className="flex items-center text-zinc-700 text-left"
-                      >
-                        <img
-                          src={video.photo}
-                          className="w-8 h-8 rounded-full mr-1"
-                          alt=""
-                        />
-                        <p className="w-20 text-zinc-600">{video.username}</p>
-                      </div>
-                      <div style={{ flex: 0.25 }} className="text-left">
-                        <p className="w-20 text-zinc-700">{video.like}</p>
-                      </div>
-                    </div>
+                      index={index}
+                      video={video}
+                    />
                   ))}
               </div>
             </div>
+
+            {/* Table */}
             <div className="flex justify-between items-center">
               {page > 1 ? (
                 <button
