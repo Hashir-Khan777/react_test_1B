@@ -25,17 +25,16 @@ const Draggable = ({ video, index, moveVideos }) => {
       }
       const hoverBoundingRect = ref.current?.getBoundingClientRect();
       const hoverMiddleY =
-        (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
+        (hoverBoundingRect.bottom + hoverBoundingRect.top) / 2;
       const clientOffset = monitor.getClientOffset();
-      const hoverClientY = clientOffset.y - hoverBoundingRect.top;
+      const hoverClientY = clientOffset.y;
       if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
         return;
       }
       if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
         return;
       }
-      moveVideos(dragIndex, hoverIndex);
-      item.index = hoverIndex;
+      moveVideos(item, index);
     },
   }));
 
@@ -84,7 +83,14 @@ const AdminDashboardPage = () => {
   };
 
   const moveVideos = (dragIndex, hoverIndex) => {
-    videos.splice(hoverIndex, 0, videos.splice(dragIndex, 1)[0]);
+    videos.splice(
+      hoverIndex,
+      0,
+      videos.splice(
+        videos.findIndex((x) => x.id === dragIndex.id),
+        1
+      )[0]
+    );
     setVideos([...videos]);
   };
 
